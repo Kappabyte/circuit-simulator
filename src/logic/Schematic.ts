@@ -1,165 +1,142 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ElectricalComponent, ResistiveComponent, VoltageSourceComponent } from "./Component"
+import { Cell, ElectricalComponent, ResistiveComponent, Resistor, VoltageSourceComponent } from "./Component"
+import { ElectricalConnection } from './Types';
+
+const removeKey = (key: string, {[key]: _, ...rest}) => rest;
 
 export class Schematic {
 
     private components: Record<string, ElectricalComponent> = {};
     // FromUUID: connection data
-    private connections: Record<string, Array<{from: string, to: string, fromIndex: number, toIndex:number}>> = {};
+    private connections: Record<string, Array<ElectricalConnection>> = {};
+    private reverseConnections: Record<string, Array<ElectricalConnection>> = {};
+
+    public static activeSchematic: Schematic = new Schematic();
+    static {
+        const cell1 = this.activeSchematic.addComponent(new Cell([5,5], 3).setOrientation('E'));
+    
+        const resistor1 = this.activeSchematic.addComponent(new Resistor([5,8], 2).setOrientation('W'));
+        const resistor2 = this.activeSchematic.addComponent(new Resistor([5,9], 2).setOrientation('W'));
+        const resistor3 = this.activeSchematic.addComponent(new Resistor([6,10], 3).setOrientation('W'));
+        const resistor4 = this.activeSchematic.addComponent(new Resistor([7,8], 3).setOrientation('W'));
+
+        this.activeSchematic.addConnection(cell1, resistor1);
+        this.activeSchematic.addConnection(cell1, resistor2);
+        this.activeSchematic.addConnection(cell1, resistor3);
+        this.activeSchematic.addConnection(resistor1, resistor4);
+        this.activeSchematic.addConnection(resistor2, resistor4);
+        this.activeSchematic.addConnection(resistor3, cell1);
+        this.activeSchematic.addConnection(resistor4, cell1);
+
+        this.activeSchematic.setHead(cell1);
+
+    }
+
+    private head: string | null = null;
 
     public addComponent(component: ElectricalComponent): string {
         const uuid = uuidv4();
+        component.uuid = uuid;
+
         this.components[uuid] = component;
 
         return uuid;
     }
 
+    public resetComponent(component: ElectricalComponent) {
+        this.components[component.uuid] = component;
+    }
+
+    public deleteComponent(component: string) {
+        const n: Record<string, ElectricalComponent> = {};
+        for(const [key, value] of Object.entries(this.components)) {
+            if(key !== component) {
+                n[key] = value;
+            }
+        }
+        this.components = n;
+
+        // Loop through all the connections and remove the ones that are connected to the deleted component
+        // This includes the reverse connections
+        for(const [key, value] of Object.entries(this.connections)) {
+            const n: Array<ElectricalConnection> = [];
+            for(const connection of value) {
+                if(connection.from !== component && connection.to !== component) {
+                    n.push(connection);
+                }
+            }
+            this.connections[key] = n;
+        }
+
+        // Loop through all the reverse connections and remove the ones that are connected to the deleted component
+        // This includes the connections
+        for(const [key, value] of Object.entries(this.reverseConnections)) {
+            const n: Array<ElectricalConnection> = [];
+            for(const connection of value) {
+                if(connection.from !== component && connection.to !== component) {
+                    n.push(connection);
+                }
+            }
+            this.reverseConnections[key] = n;
+        }
+    }
+
+    public setHead(component: string) {
+        this.head = component;
+    }
+
     public addConnection(from: string, to: string, fromIndex: number = 0, toIndex: number = 0) {
         //TODO: Make sure UUIDs are valid
         if(!this.connections[from]) this.connections[from] = [];
+        if(!this.reverseConnections[to]) this.reverseConnections[to] = [];
         this.connections[from].push({
             from: from,
             to: to,
             fromIndex: fromIndex,
             toIndex: toIndex
         });
+        this.reverseConnections[to].push({
+            from: from,
+            to: to,
+            fromIndex: fromIndex,
+            toIndex: toIndex
+        })
     }
 
-    public compileCircuit(start: string): CompiledCircuit {
-        let node = new CompiledCircuitNode(start, this.components[start]);
-        node = this.compileComponent(node, {});
-        return new CompiledCircuit(node);
-    }
-
-    public compileComponent(parent: CompiledCircuitNode, compiled: Record<string, CompiledCircuitNode>): CompiledCircuitNode {
-        if(!Object.hasOwn(this.connections, parent.getComponent()[0])) return parent;
-        
-        //Compile forewards connections
-        for(const connection of this.connections[parent.getComponent()[0]]) {
-            let node = new CompiledCircuitNode(connection.to, this.components[connection.to]);
-
-            if(Object.hasOwn(compiled, node.getComponent()[0])) {
-                node = compiled[node.getComponent()[0]];
-            } else {
-                compiled[node.getComponent()[0]] = node;
-                node = this.compileComponent(node, compiled);
-            }
-
-            parent.connectTo(node);
-            compiled[node.getComponent()[0]] = node;
-        }
-
-        //Compile backwards connections
-        for(const connectionGroup of Object.values(this.connections)) {
-            for(const connection of connectionGroup) {
-                if(connection.to == parent.getComponent()[0]) {
-                    parent.connectFrom(compiled[connection.from]);
-                }
+    public deleteConnection(from: string, to: string) {
+        // Remove a connection from the connections array based on the from uuid and to uuid
+        const n: Array<ElectricalConnection> = [];
+        for(const connection of this.connections[from]) {
+            if(connection.to !== to) {
+                n.push(connection);
             }
         }
+        this.connections[from] = n;
 
-        return parent;
+        // DO the same for reverse connections
+        const n2: Array<ElectricalConnection> = [];
+        for(const connection of this.reverseConnections[to]) {
+            if(connection.from !== from) {
+                n2.push(connection);
+            }
+        }
+        this.reverseConnections[to] = n2;
     }
 
     public getComponents(): Record<string, ElectricalComponent> {
         return this.components;
     }
-}
 
-class SchematicMathProvider {
-
-    private schem: CompiledCircuit;
-
-    constructor(schem: CompiledCircuit) {
-        this.schem = schem;
+    public getConnections(): Record<string, Array<ElectricalConnection>> {
+        return this.connections;
     }
 
-    getTotalResitance(): number {
-        return this.getResistanceInParallelCircuit(this.schem.getStart(), this.schem.getStart().getComponent()[0]);
+    public getReverseConnections(): Record<string, Array<ElectricalConnection>> {
+        return this.reverseConnections;
     }
 
-    private getResistanceInParallelCircuit(head: CompiledCircuitNode, start: string): number {
-        let resistance = 0;
-        
-        if(head instanceof ResistiveComponent) {
-            resistance += head.getResistance();
-        }
-
-        let r_Inverse = 0;
-        for(const child of head.getConnectedTo()) {
-            if(child.getComponent()[0] == start) continue;
-            r_Inverse += 1 / this.getResistanceInParallelCircuit(child, start);
-        }
-
-        resistance += 1 / r_Inverse;
-
-        return resistance == 0 || resistance == Infinity ? 0 : resistance;
-    }
-
-    getTotalCurrent(): number {
-        return this.getTotalVoltage() / this.getTotalResitance();
-    }
-
-    getTotalVoltage(): number {
-        //Recursivly calculate voltage
-        //NOTE: If a 
-        return -1;
-    }
-
-}
-
-class CompiledCircuit {
-    public readonly math: SchematicMathProvider = new SchematicMathProvider(this);
-
-    private originalCircuit: CompiledCircuitNode;
-    private networkMapped: CompiledCircuitNode;
-
-    private notInCircuit: Record<string, ElectricalComponent> = {};
-
-    constructor(start: CompiledCircuitNode) {
-        this.originalCircuit = start;
-        this.networkMapped = start;
-
-        this.mapNetwork();
-    }
-
-    private mapNetwork() {
-        //TODO: convert all delta/pi networks to Y/T networks
-    }
-
-    public getStart() {
-        return this.originalCircuit;
-    }
-}
-
-class CompiledCircuitNode {
-    private component: [string, ElectricalComponent];
-
-    private connectedTo: Array<CompiledCircuitNode> = [];
-    private connectedFrom: Array<CompiledCircuitNode> = [];
-
-    public constructor(uniqueID: string, component: ElectricalComponent) {
-        this.component = [uniqueID, component];
-    }
-
-    public connectTo(node: CompiledCircuitNode) {
-        this.connectedTo.push(node);
-    }
-
-    public connectFrom(node: CompiledCircuitNode) {
-        this.connectedFrom.push(node);
-    }
-
-    public getConnectedTo() {
-        return this.connectedTo;
-    }
-
-    public getConnectedFrom() {
-        return this.connectedFrom;
-    }
-
-    public getComponent(): [string, ElectricalComponent] {
-        return this.component;
+    public getHead() {
+        return this.head;
     }
 }
 

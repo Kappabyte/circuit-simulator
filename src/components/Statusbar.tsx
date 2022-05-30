@@ -1,22 +1,22 @@
 import { SetView, View } from "../views/View";
 import styles from "../styles/Statusbar.module.css"
+import { url } from "inspector";
 
-const StatusBar = ({view, setView}:{view: View, setView: SetView}) => {
+const StatusBar = ({option, setOption}:{option: string, setOption: SetView}) => {
     return <div className={styles.bar}>
         <div className={styles.views}>
-            <ViewToggle enabled={view === 'schematic'} view='schematic' setView={setView} color='rgb(0, 195, 255)'/>
-            <ViewToggle enabled={view === 'detailed'} view='detailed' setView={setView} color='rgb(237, 166, 24)'/>
-            <ViewToggle enabled={view === 'rendered'} view='rendered' setView={setView} color='rgb(24, 242, 79)'/>
+            <Toggle enabled={option === 'move'} option='move' setOption={setOption} image='assets/view.png'/>
+            <Toggle enabled={option === 'edit'} option='edit' setOption={setOption} image='assets/edit.png'/>
+            <Toggle enabled={option === 'rendered'} option='rendered' setOption={setOption} image='assets/cube.png'/>
         </div>
         <p>v 0.0.1a</p>
     </div>
 }
 
-const ViewToggle = ({enabled, view, setView, color}: {enabled:boolean, view: View, setView: SetView, color: string}) => {
+const Toggle = ({enabled, option, setOption, image}: {enabled:boolean, option: View, setOption: SetView, image: string}) => {
     return <>
-        <div className={`${styles.viewToggle} ${enabled ? styles.toggled : ""}`} onClick={() => {setView(view)}}>
-            <div className={styles.toggleIcon} style={{backgroundColor: color}}></div>
-            <span>{view}</span>
+        <div className={`${styles.viewToggle} ${enabled ? styles.toggled : ""}`} onClick={() => {setOption(option)}}>
+            <div className={styles.toggleIcon} style={{backgroundImage: `url(${image})`}}></div>
         </div>
     </>
 }

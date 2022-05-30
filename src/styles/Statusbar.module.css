@@ -1,34 +1,32 @@
 .toggleIcon {
     padding: 0px;
     height: 25px;
-    width: 50px;
+    width: 25px;
     padding: 0px;
-    margin:0px;
-    clip-path: polygon(0% 0%, 70% 0%, 100% 50%, 70% 100%, 0% 100%, 30% 50%);
-    background: inherit;
+    margin-right:10px;
+    margin-left: 10px;
+    background-size: cover;
 }
 
 .viewToggle {
     display: grid;
-    grid-template-columns: 20px auto;
-    width: 50px;
+    grid-template-columns: 35px auto;
+    width: 55px;
     height: 25px;
-    font-size: 1.2em;
+    font-size: 1.3em;
     cursor: pointer;
-    margin-left: -16px;
     overflow: hidden;
-
-    transition: width 0.5s ease-out;
 }
 
-.viewToggle>span {
-    padding: 1px 10px 1px 40px;
+.toggled {
+    background-color: #4CAF50;
 }
 
 .bar {
     position: absolute;
-    background: rgb(44, 44, 44);
-    display: flex;
+    background: rgb(29, 29, 29);
+    display: grid;
+    grid-template-columns: 200px auto 150px;
     width: 100%;
 
     bottom: 0px;
@@ -45,9 +43,19 @@
     right: 0px;
     display: flex;
     justify-content: flex-end;
-    background: rgb(56, 56, 56);
+    background: rgb(84, 84, 84);
 }
 
-.toggled {
-    width: 175px;
+.bar span,.bar p {
+    font-size: 1.2em;
+    margin-left: 15px;
+    width: 125px;
+    color: black;
+}
+
+.bar>p{
+    grid-column: 3;
+    text-align: right;
+    background: rgb(84, 84, 84);
+    padding-right: 20px;
 }
