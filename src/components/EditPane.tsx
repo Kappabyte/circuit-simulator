@@ -2,7 +2,7 @@ import { useState } from "react"
 import { CompiledNetwork } from "../logic/Compiler"
 import { ElectricalComponent, ResistiveComponent, VoltageSourceComponent } from "../logic/Component"
 import { Schematic } from "../logic/Schematic"
-
+//
 import styles from "../styles/EditPane.module.css"
 
 export const EditPane = ({component, setEditComponent, editState, setEditState}: {component: ElectricalComponent | undefined, setEditComponent: (component: ElectricalComponent | undefined) => void, editState: 'normal' | 'connect' | 'place', setEditState: (component: 'normal' | 'connect' | 'place') => void}) => {
