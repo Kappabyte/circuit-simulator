@@ -11,3 +11,11 @@ body {
 canvas {
     margin: -8px;
 }
+
+html, body, div#root { min-height: 100%; }
+
+#root {
+    margin: -8px;
+    height: 100vh;
+    display: flex;
+}

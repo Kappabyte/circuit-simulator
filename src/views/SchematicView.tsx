@@ -11,6 +11,13 @@ const direction = {
     'W': { x: 3, y: 1 }
 }
 
+const direction2 = {
+    'N': { x: 1, y: -1 },
+    'E': { x: -1, y: 1 },
+    'S': { x: 1, y: 3 },
+    'W': { x: 3, y: 1 }
+}
+
 const rotation: Record<string, number> = {
     'N': 0,
     'E': Math.PI * 3 / 2,
@@ -103,7 +110,7 @@ export const SchematicView = ({option}: {option: View}) => {
                 // context.fillRect(x + component.getRelativeConnectionLocation(1)[0] * transform.ELEMENT_SIZE + transform.ELEMENT_SIZE / 2 - 1, y + component.getRelativeConnectionLocation(1)[1] * transform.ELEMENT_SIZE + transform.ELEMENT_SIZE / 2 - 1, 2, 2);
             } else {
                 const img = new Image();
-                img.src = window.location.protocol + "//" + window.location.host + "/" + imageSource;
+                img.src = imageSource;
                 img.onload = () => {
                     cachedImages[imageSource] = img;
                 }
@@ -164,16 +171,16 @@ export const SchematicView = ({option}: {option: View}) => {
                     
                     const reverseConnection = Schematic.activeSchematic.getReverseConnections()[componentUUID.to];
                     
-                    const lx = (Math.max(...reverseConnection.map(c => Schematic.activeSchematic.getComponents()[c.from].getPosition()[0])) + transform.TRANSLATION[0]) * transform.GRID_SIZE * transform.SCALE + direction[source.orientation].x * transform.ELEMENT_SIZE / 2;
-                    const hx = (Math.min(...connection.map(c => Schematic.activeSchematic.getComponents()[c.to].getPosition()[0])) + transform.TRANSLATION[0]) * transform.GRID_SIZE * transform.SCALE + direction[source.orientation].x * transform.ELEMENT_SIZE / 2;
-                    const ly = (Math.max(...reverseConnection.map(c => Schematic.activeSchematic.getComponents()[c.from].getPosition()[1])) + transform.TRANSLATION[1]) * transform.GRID_SIZE * transform.SCALE + direction[source.orientation].y * transform.ELEMENT_SIZE / 2;
-                    const hy = (Math.min(...connection.map(c => Schematic.activeSchematic.getComponents()[c.to].getPosition()[1])) + transform.TRANSLATION[1]) * transform.GRID_SIZE * transform.SCALE + direction[source.orientation].y * transform.ELEMENT_SIZE / 2;
+                    const lx = (Math.max(...reverseConnection.map(c => Schematic.activeSchematic.getComponents()[c.from].getPosition()[0])) + transform.TRANSLATION[0]) * transform.GRID_SIZE * transform.SCALE + direction2[source.orientation].x * transform.ELEMENT_SIZE / 2;
+                    const hx = (Math.min(...connection.map(c => Schematic.activeSchematic.getComponents()[c.to].getPosition()[0])) + transform.TRANSLATION[0]) * transform.GRID_SIZE * transform.SCALE + direction2[source.orientation].x * transform.ELEMENT_SIZE / 2;
+                    const ly = (Math.max(...reverseConnection.map(c => Schematic.activeSchematic.getComponents()[c.from].getPosition()[1])) + transform.TRANSLATION[1]) * transform.GRID_SIZE * transform.SCALE + direction2[source.orientation].y * transform.ELEMENT_SIZE / 2;
+                    const hy = (Math.min(...connection.map(c => Schematic.activeSchematic.getComponents()[c.to].getPosition()[1])) + transform.TRANSLATION[1]) * transform.GRID_SIZE * transform.SCALE + direction2[source.orientation].y * transform.ELEMENT_SIZE / 2;
 
                     //North
                     if(source.orientation === "N") {
                         ctx.beginPath();
-                        ctx.moveTo(x1, y1);
-                        ctx.lineTo(x1, hy);
+                        ctx.moveTo(x1 + 1, y1);
+                        ctx.lineTo(x1 + 1, hy);
                         ctx.lineTo(x2, hy);
                         ctx.lineTo(x2, y2);
                         ctx.stroke();
@@ -208,6 +215,7 @@ export const SchematicView = ({option}: {option: View}) => {
                     }
                 });
             });
+            
         });
     }
 

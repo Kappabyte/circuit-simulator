@@ -30,17 +30,20 @@ export const EditPane = ({component, setEditComponent, editState, setEditState}:
                 <button disabled={Schematic.activeSchematic.getHead() === component.uuid} onClick={() => {
                     Schematic.activeSchematic.deleteComponent(component?.uuid as string);
                     setEditComponent(undefined);
+                    setCompiled(new CompiledNetwork(Schematic.activeSchematic))
                 }}>Delete</button>
                 <button onClick={() => {
                     component.rotate();
+                    setCompiled(new CompiledNetwork(Schematic.activeSchematic))
                 }}>Rotate</button>
                 <button onClick={() => {
                     console.log("set edit state to: " + (editState == 'normal' ? 'connect' : "normal"))
                     setEditState(editState == 'normal' ? 'connect' : "normal")
+                    setCompiled(new CompiledNetwork(Schematic.activeSchematic))
                 }} disabled={editState === 'place'}>{editState === 'connect' ? "Stop Connecting" : "Connect"}</button>
             </div>
             <p>Resistance</p>
-            <input type="number" inputMode="decimal" disabled={!(component instanceof ResistiveComponent)} value={resistance} onChange={(value) => {
+            <input type="number" inputMode="decimal" disabled={!(component instanceof ResistiveComponent)} value={Schematic.activeSchematic.getHead() === component.uuid ? compiled.resistance.toPrecision(3) : (component instanceof ResistiveComponent ? resistance : resistance.toPrecision(3))} onChange={(value) => {
                 console.log("a")
                 if(component instanceof ResistiveComponent) {
                     console.log(Schematic.activeSchematic)
@@ -52,14 +55,15 @@ export const EditPane = ({component, setEditComponent, editState, setEditState}:
                 }
             }}/>
             <p>Voltage</p>
-            <input type="number" inputMode="decimal" disabled={!(component instanceof VoltageSourceComponent)} value={voltage} onChange={(value) => {
+            <input type="number" inputMode="decimal" disabled={!(component instanceof VoltageSourceComponent)} value={component instanceof VoltageSourceComponent ? voltage : voltage.toPrecision(3)} onChange={(value) => {
                 if(component instanceof VoltageSourceComponent) {
                     component.setSuppliedVoltage(parseFloat(value.target.value))
+                    setCompiled(new CompiledNetwork(Schematic.activeSchematic))
                     setCompiled(new CompiledNetwork(Schematic.activeSchematic))
                 }
             }}/>
             <p>Current</p>
-            <input type="number" disabled={true} value={current} readOnly={true}/>
+            <input type="number" disabled={true} value={current.toPrecision(3)} readOnly={true}/>
         </div>
     </> 
     :

@@ -16,26 +16,59 @@
     font-size: 1.3em;
     cursor: pointer;
     overflow: hidden;
+    transition: 0.25s linear;
+}
+
+.viewToggle:hover {
+    background-color: rgb(164, 164, 164);
+}
+
+.viewBtn {
+    display: grid;
+    grid-template-columns: 35px auto;
+    width: 45px;
+    height: 25px;
+    font-size: 1.3em;
+    cursor: pointer;
+    overflow: hidden;
+    background-color: rgb(99, 99, 99);
+    background-size: cover;
+    height: 25px;
+}
+
+.viewBtn>input {
+    all: unset;
+    opacity: 0;
+    height: 25px;
+    width: 45px;
+    position: absolute;
+    left: 45px;
+}
+
+.viewBtn:hover {
+    background-color: rgb(164, 164, 164);
 }
 
 .toggled {
-    background-color: #4CAF50;
+    background-color: #4CAF50 !important;
 }
 
 .bar {
     position: absolute;
     background: rgb(29, 29, 29);
     display: grid;
-    grid-template-columns: 200px auto 150px;
-    width: 100%;
+    grid-template-columns: 200px auto 300px;
+    width: 100vw;
 
     bottom: 0px;
     left: 0px;
+    height: 25px;
 }
 
 .bar>* {
     margin: 0px 50px 0px 0px;
     vertical-align: middle;
+    height: 25px;
 }
 
 .views {
@@ -46,6 +79,17 @@
     background: rgb(84, 84, 84);
 }
 
+.actions {
+    grid-column: 3;
+    position: relative;
+    right: -50px;
+    display: flex;
+    justify-content: flex-start;
+    background: rgb(84, 84, 84);
+    vertical-align: middle;
+    height: 25px;
+}
+
 .bar span,.bar p {
     font-size: 1.2em;
     margin-left: 15px;
@@ -53,9 +97,10 @@
     color: black;
 }
 
-.bar>p{
-    grid-column: 3;
+.bar>.actions>p{
     text-align: right;
     background: rgb(84, 84, 84);
     padding-right: 20px;
+    position: relative;
+    top: -18px;
 }

@@ -6,14 +6,17 @@ import "./styles/main.css"
 import { defaultSchematic, Schematic } from "./logic/Schematic";
 import { SimpleCircuitTest } from "./test/SimpleCircuitTest.test";
 import { SchematicView } from "./views/SchematicView";
+import { RenderedView } from "./views/RenderedView";
 
 const App = () => {
   const [view, setView] = useState<View>('move');
-
-  const [schematic] = useState<Schematic>(defaultSchematic);
   return (
     <>
-      <SchematicView option={view}></SchematicView>
+      {view != "rendered" ?
+        <SchematicView option={view}></SchematicView>
+        :
+        <RenderedView />
+    }
       <StatusBar option={view} setOption={setView}/>
     </>
   );

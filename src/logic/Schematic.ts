@@ -20,6 +20,14 @@ export class Schematic {
         const resistor3 = this.activeSchematic.addComponent(new Resistor([6,10], 3).setOrientation('W'));
         const resistor4 = this.activeSchematic.addComponent(new Resistor([7,8], 3).setOrientation('W'));
 
+        
+        // const cell1 = this.activeSchematic.addComponent(new Cell([5,5], 3).setOrientation('N'));
+    
+        // const resistor1 = this.activeSchematic.addComponent(new Resistor([8,5], 2).setOrientation('S'));
+        // const resistor2 = this.activeSchematic.addComponent(new Resistor([9,5], 2).setOrientation('S'));
+        // const resistor3 = this.activeSchematic.addComponent(new Resistor([10,6], 3).setOrientation('S'));
+        // const resistor4 = this.activeSchematic.addComponent(new Resistor([8,7], 3).setOrientation('S'));
+
         this.activeSchematic.addConnection(cell1, resistor1);
         this.activeSchematic.addConnection(cell1, resistor2);
         this.activeSchematic.addConnection(cell1, resistor3);
@@ -30,6 +38,26 @@ export class Schematic {
 
         this.activeSchematic.setHead(cell1);
 
+    }
+
+    public static load(json: string): Schematic {
+        const schematic = new Schematic();
+        const data = JSON.parse(json);
+        if(!data || !data.components || !data.connections || !data.reverseConnections || !data.head) return this.activeSchematic
+        for(const component of Object.values(data.components) as any[]) {
+            if(component.name === "resistor") {
+                schematic.components[component.uuid] = new Resistor(component.position, component.resistance).setOrientation(component.orientation);
+            }
+            else if(component.name === "cell") {
+                schematic.components[component.uuid] = new Cell(component.position, component.voltage).setOrientation(component.orientation);
+            }
+            schematic.components[component.uuid].uuid = component.uuid;
+        }
+        schematic.connections = data.connections;
+        schematic.reverseConnections = data.reverseConnections;
+        schematic.head = data.head;
+        console.log(schematic)
+        return schematic;
     }
 
     private head: string | null = null;

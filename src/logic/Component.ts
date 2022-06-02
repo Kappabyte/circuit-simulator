@@ -13,6 +13,7 @@ export abstract class ElectricalComponent {
     }
 
     public abstract getRelativeConnectionLocation(index: number): [number, number];
+    public abstract getRelativeConnectionLocation3D(index: number): [number, number];
 
     public abstract render(ctx: any, renderCallback: RenderCallback): void;
 
@@ -109,11 +110,24 @@ export class Resistor extends ResistiveComponent {
             case 'N':
                 return [0, 0.4 * (index === 0 ? -1 : 1)];
             case 'E':
-                return [0.4  * (index === 0 ? -1 : 1), 0];
+                return [0.4 * (index === 0 ? -1 : 1), 0];
             case 'S':
                 return [0, 0.4 * (index === 0 ? 1 : -1)];
             case 'W':
                 return [0.4  * (index === 0 ? 1 : -1), 0];
+        }
+    }
+
+    public getRelativeConnectionLocation3D(index: number): [number, number] {
+        switch(this.orientation) {
+            case 'N':
+                return [0, -.4 * (index === 0 ? 1 : -1)];
+            case 'E':
+                return [-.4 * (index === 0 ? 1 : -1), 0];
+            case 'S':
+                return [0, .4 * (index === 0 ? 1 : -1)];
+            case 'W':
+                return [.4 * (index === 0 ? 1 : -1), 0];
         }
     }
 
@@ -175,6 +189,19 @@ export class Cell extends VoltageSourceComponent {
                 return [0, (0.06 + multiplier) * (index === 0 ? 1 : -1)];
             case 'W':
                 return [0.06  * (index === 0 ? 1 : -1) * multiplier, 0];
+        }
+    }
+
+    public getRelativeConnectionLocation3D(index: number): [number, number] {
+        switch(this.orientation) {
+            case 'N':
+                return [0, 0];
+            case 'E':
+                return [0, 0];
+            case 'S':
+                return [0, 0];
+            case 'W':
+                return [0, 0];
         }
     }
 }
