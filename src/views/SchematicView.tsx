@@ -293,7 +293,7 @@ export const SchematicView = ({option}: {option: View}) => {
                 render(canvas, ctx);
             }, 1000 / 60));
         });
-    }, [option, editComponent, editState])
+    }, [option, editComponent, editState, r])
 
     useEffect(() => {
         const canvas = document.getElementById('schematic-canvas') as HTMLCanvasElement;
